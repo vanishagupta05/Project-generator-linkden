@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LinkedIn Career Capture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #08080f;
+      --surface: #111119;
+      --surface2: #16161f;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.13);
+      --accent: #7c6aff;
+      --accent2: #ff6a9b;
+      --accent3: #6affca;
+      --text: #f0eeff;
+      --muted: rgba(240,238,255,0.45);
+    }
+
+    body {
+      width: 360px;
+      min-height: 480px;
+      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124,106,255,0.14) 0%, transparent 70%);
+    }
+
+    /* Header */
+    .hdr {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .hdr-left { display: flex; flex-direction: column; gap: 2px; }
+    .hdr-eyebrow {
+      font-family: 'Syne', sans-serif;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .hdr-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .hdr-mode {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .hdr-mode:hover { border-color: var(--border2); color: var(--text); }
+    .hdr-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: all 0.3s; flex-shrink: 0; }
+    .hdr-dot.on { background: var(--accent3); box-shadow: 0 0 8px rgba(106,255,202,0.5); animation: pop-pulse 1.5s ease-in-out infinite; }
+    @keyframes pop-pulse { 0%,100%{box-shadow:0 0 6px rgba(106,255,202,0.4)} 50%{box-shadow:0 0 14px rgba(106,255,202,0.7)} }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+    }
+    .tab {
+      font-family: 'Syne', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 11px 0;
+      margin-right: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab:hover:not(.active) { color: var(--text); }
+
+    /* Tab panes */
+    .pane { display: none; padding: 16px 20px; }
+    .pane.active { display: block; }
+
+    /* Section label */
+    .slabel {
+      font-family: 'Syne', sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .slabel::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* Capture mode card */
+    .mode-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .mode-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .mode-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); flex-shrink: 0; transition: all 0.3s; }
+    .mode-dot.active { background: var(--accent3); box-shadow: 0 0 10px rgba(106,255,202,0.5); animation: pop-pulse 1.5s ease-in-out infinite; }
+    .mode-status { font-size: 13px; font-weight: 500; flex: 1; }
+    .mode-ctx {
+      background: rgba(124,106,255,0.07);
+      border: 1px solid rgba(124,106,255,0.13);
+      border-radius: 7px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+    }
+    .mode-ctx-label { font-size: 8px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
+    .mode-ctx-val { font-size: 12px; color: rgba(240,238,255,0.6); line-height: 1.5; }
+    .mode-empty { font-size: 12px; color: var(--muted); text-align: center; padding: 8px 0; line-height: 1.6; }
+
+    /* Buttons */
+    .btn {
+      font-family: 'Syne', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 9px 14px;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #7c6aff, #9b6aff);
+      color: #fff;
+      width: 100%;
+      justify-content: center;
+      box-shadow: 0 3px 12px rgba(124,106,255,0.25);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(124,106,255,0.35); }
+    .btn-danger {
+      background: rgba(255,80,80,0.1);
+      color: #ff8080;
+      border: 1px solid rgba(255,80,80,0.18);
+    }
+    .btn-danger:hover { background: rgba(255,80,80,0.16); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+    .btn-green {
+      background: rgba(106,255,202,0.1);
+      color: var(--accent3);
+      border: 1px solid rgba(106,255,202,0.2);
+    }
+    .btn-green:hover { background: rgba(106,255,202,0.16); }
+
+    /* Search pack */
+    .pack-card {
+      background: var(--surface);
+      border: 1px solid rgba(124,106,255,0.2);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .pack-kw {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .pack-meta { font-size: 11px; color: var(--muted); line-height: 1.5; }
+    .pack-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+    .pack-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 100px;
+      background: rgba(124,106,255,0.1);
+      color: var(--accent);
+      border: 1px solid rgba(124,106,255,0.2);
+    }
+    .pack-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+    /* Profile list */
+    .profile-list { display: flex; flex-direction: column; gap: 8px; }
+    .profile-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      transition: border-color 0.15s;
+    }
+    .profile-card:hover { border-color: var(--border2); }
+    .profile-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(124,106,255,0.3), rgba(255,106,155,0.2));
+      flex-shrink: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-info { flex: 1; min-width: 0; }
+    .profile-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .profile-title { font-size: 11px; color: var(--muted); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .profile-ctx { font-size: 10px; color: rgba(124,106,255,0.65); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .profile-del {
+      background: none;
+      border: none;
+      color: rgba(240,238,255,0.2);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 2px;
+      flex-shrink: 0;
+      transition: color 0.12s;
+    }
+    .profile-del:hover { color: #ff8080; }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 20px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .empty-state-icon { font-size: 28px; margin-bottom: 10px; }
+
+    /* Action bar */
+    .action-bar {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .stat-label { font-size: 10px; color: var(--muted); }
+
+    /* Open LinkedIn button */
+    .li-btn {
+      background: linear-gradient(135deg, #0a66c2, #0077b5);
+      color: #fff;
+      width: 100%;
+      justify-content: center;
+      box-shadow: 0 3px 12px rgba(10,102,194,0.25);
+      margin-bottom: 8px;
+      font-size: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 10px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .li-btn:hover { opacity: 0.9; }
+
+    /* Scrollable list area */
+    .scrollable { max-height: 300px; overflow-y: auto; }
+    .scrollable::-webkit-scrollbar { width: 3px; }
+    .scrollable::-webkit-scrollbar-track { background: transparent; }
+    .scrollable::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* Filter row */
+    .filter-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+    .filter-chip {
+      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 100px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .filter-chip.active { background: rgba(124,106,255,0.12); border-color: var(--accent); color: var(--accent); }
+
+    /* Notice */
+    .notice {
+      background: rgba(124,106,255,0.07);
+      border: 1px solid rgba(124,106,255,0.12);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: rgba(240,238,255,0.6);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="hdr">
+    <div class="hdr-left">
+      <div class="hdr-eyebrow">Career Accelerator</div>
+      <div class="hdr-title">LinkedIn Capture</div>
+    </div>
+    <button class="hdr-mode" id="mode-toggle-hdr">
+      <div class="hdr-dot" id="hdr-dot"></div>
+      <span id="hdr-mode-text">OFF</span>
+    </button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="capture">Capture</button>
+    <button class="tab" data-tab="saved">Saved</button>
+    <button class="tab" data-tab="search">Search</button>
+  </div>
+
+  <!-- CAPTURE TAB -->
+  <div class="pane active" id="tab-capture">
+    <div class="slabel">Status</div>
+    <div class="mode-card">
+      <div class="mode-row">
+        <div class="mode-dot" id="mode-dot"></div>
+        <div class="mode-status" id="mode-status-text">Capture Mode: OFF</div>
+      </div>
+      <div id="mode-context-area"></div>
+      <button class="btn btn-primary" id="main-toggle-btn">▶ Start Capture Mode</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-saved">0</div>
+        <div class="stat-label">Profiles Saved</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-searches">0</div>
+        <div class="stat-label">Searches Done</div>
+      </div>
+    </div>
+
+    <div class="slabel">Open LinkedIn</div>
+    <button class="li-btn" id="open-li-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      Open LinkedIn People Search
+    </button>
+
+    <div class="notice">
+      💡 Navigate to LinkedIn and use the search page. The capture banner will appear automatically when you're on a people search page.
+    </div>
+  </div>
+
+  <!-- SAVED TAB -->
+  <div class="pane" id="tab-saved">
+    <div id="saved-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="slabel" style="margin-bottom:0">Captured Profiles</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-primary" id="rescore-btn" style="font-size:9px;padding:6px 10px;">✦ Re-score</button>
+        <button class="btn btn-green" id="export-btn" style="font-size:9px;padding:6px 10px;">⬇ Export</button>
+        <button class="btn btn-danger" id="clear-btn" style="font-size:9px;padding:6px 10px;">✕ Clear All</button>
+      </div>
+    </div>
+    <div class="filter-row" id="filter-row"></div>
+    <div class="scrollable">
+      <div id="profile-list" class="profile-list"></div>
+    </div>
+  </div>
+
+  <!-- SEARCH TAB -->
+  <div class="pane" id="tab-search">
+    <div class="slabel">App Search Packs</div>
+    <div id="search-pack-area"></div>
+    <div class="slabel" style="margin-top:14px">Manual Search</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <input id="manual-keywords" type="text" placeholder="e.g. machine learning evaluation" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 12px;outline:none;width:100%;transition:border-color 0.15s;" onfocus="this.style.borderColor='rgba(124,106,255,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'" />
+      <button class="btn btn-primary" id="manual-search-btn">⊕ Open LinkedIn Search</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
