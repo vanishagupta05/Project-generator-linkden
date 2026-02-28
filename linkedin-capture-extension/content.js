@@ -76,7 +76,9 @@
     bannerEl.querySelector("#lcc-close-btn").addEventListener("click", () => bannerEl.remove());
     bannerEl.querySelector("#lcc-toggle-btn").addEventListener("click", toggleCapture);
     bannerEl.querySelector("#lcc-view-btn")?.addEventListener("click", () => {
-      chrome.runtime.sendMessage({ type: "OPEN_POPUP" });
+      chrome.runtime.sendMessage({ type: "OPEN_SAVED_TAB" }, () => {
+        showToast("Open extension popup to view Saved profiles", false);
+      });
     });
   }
 

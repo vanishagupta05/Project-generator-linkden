@@ -129,6 +129,20 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     });
     return true;
   }
+
+  if (msg.type === "OPEN_SAVED_TAB") {
+    chrome.storage.local.set({ popupOpenTab: "saved" }, async () => {
+      try {
+        if (chrome.action?.openPopup) {
+          await chrome.action.openPopup();
+        }
+      } catch {
+        // Ignore; popup can still be opened manually and will land on Saved tab.
+      }
+      sendResponse({ ok: true });
+    });
+    return true;
+  }
 });
 
 // Open LinkedIn search URL when triggered from external app

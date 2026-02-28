@@ -7,15 +7,22 @@
   let activeFilter = "all";
   let rescoring = false;
 
+  function activateTab(tabName) {
+    const tab = document.querySelector(`.tab[data-tab="${tabName}"]`);
+    const pane = document.getElementById(`tab-${tabName}`);
+    if (!tab || !pane) return;
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".pane").forEach(p => p.classList.remove("active"));
+    tab.classList.add("active");
+    pane.classList.add("active");
+    if (tabName === "saved") loadProfiles();
+    if (tabName === "search") loadSearchPack();
+  }
+
   // ── Tab switching ──────────────────────────────────────────────────
   document.querySelectorAll(".tab").forEach(tab => {
     tab.addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-      document.querySelectorAll(".pane").forEach(p => p.classList.remove("active"));
-      tab.classList.add("active");
-      document.getElementById(`tab-${tab.dataset.tab}`).classList.add("active");
-      if (tab.dataset.tab === "saved") loadProfiles();
-      if (tab.dataset.tab === "search") loadSearchPack();
+      activateTab(tab.dataset.tab);
     });
   });
 
@@ -29,6 +36,14 @@
     chrome.runtime.sendMessage({ type: "GET_SAVED_PROFILES" }, (profiles) => {
       allProfiles = profiles || [];
       updateStats();
+    });
+
+    chrome.storage.local.get(["popupOpenTab"], (res) => {
+      const targetTab = res?.popupOpenTab;
+      if (targetTab === "saved" || targetTab === "search" || targetTab === "capture") {
+        activateTab(targetTab);
+      }
+      if (targetTab) chrome.storage.local.remove(["popupOpenTab"]);
     });
   }
 
